@@ -4,9 +4,9 @@ namespace DoctrineExtensions\REST\EntityManager;
 
 interface WrapperInterface
 {
-    function createQueryBuilder();
-    function getMetadataFactory();
-    function remove($entity);
-    function flush();
-    function find($entity, $id);
+    public function createQueryBuilder();
+    public function getMetadataFactory();
+    public function remove($entity);
+    public function flush();
+    public function find($entity, $id);
 }
