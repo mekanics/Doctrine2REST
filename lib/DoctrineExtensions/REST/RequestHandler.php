@@ -9,7 +9,6 @@ class RequestHandler
     private $_em;
     private $_request;
     private $_response;
-    private $_isSecure = false;
     private $_username;
     private $_password;
     private $_credentialsCallback;
@@ -43,17 +42,14 @@ class RequestHandler
         $this->_actions[$action] = $className;
     }
 
-    public function isSecure($bool = null)
+    public function isSecure()
     {
-        if ($bool !== null) {
-            $this->_isSecure = $bool;
-        }
-        return $this->_isSecure;
+        return ($this->_username && $this->_password) ? true : false;
     }
 
     public function checkCredentials($username, $password)
     {
-        if ( ! $this->_isSecure) {
+        if ( ! $this->isSecure()) {
             return true;
         }
 

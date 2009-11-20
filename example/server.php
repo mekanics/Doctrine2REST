@@ -29,7 +29,6 @@ $em = new \DoctrineExtensions\REST\EntityManager\Wrapper(
 );
 
 $server = new \DoctrineExtensions\REST\Server($em, $_REQUEST);
-$server->isSecure(true);
 $server->setUsername('jwage');
 $server->setPassword('password');
 $server->run();

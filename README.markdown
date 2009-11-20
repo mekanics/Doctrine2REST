@@ -78,7 +78,6 @@ Lets setup our REST server:
 
 You can configure required security credentials for the server too:
 
-    $server->isSecure(true);
     $server->setUsername('jwage');
     $server->setPassword('changeme');
 

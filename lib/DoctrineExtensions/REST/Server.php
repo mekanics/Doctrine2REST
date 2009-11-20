@@ -23,11 +23,6 @@ class Server
         $this->_requestHandler->registerAction($action, $className);
     }
 
-    public function isSecure($bool = null)
-    {
-        return $this->_requestHandler->isSecure($bool);
-    }
-
     public function setUsername($username)
     {
         $this->_requestHandler->setUsername($username);
