@@ -13,7 +13,7 @@ First we need to setup our class loader from Doctrine to load our classes:
 
     // api.php
 
-    require '/path/to/doctrine/Doctrine/Common/IsolatedClassLoader.php';
+    require '/path/to/project/lib/Doctrine/Common/IsolatedClassLoader.php';
 
     $classLoader = new \Doctrine\Common\IsolatedClassLoader();
     $classLoader->setBasePath('/path/to/project/lib');
@@ -166,3 +166,106 @@ One convenient feature of the API is the ability to execute arbitrary DQL querie
 You can even issue a DELETE or UPDATE query:
 
     $result = $client->dql('DELETE FROM Entities\User u WHERE u.id = 1');
+
+## Using in Symfony
+
+To use this feature is very simple. We simply need to setup an application with 
+a routing file. Paste the following routes:
+
+    homepage:
+      class: sfRequestRoute
+      url:   /
+      param: { module: api, action: index, sf_format: json }
+      requirements:
+        _format: get
+
+    api:
+      class: sfRequestRoute
+      url:   /api.:sf_format
+      param: { module: api, action: index, sf_format: json }
+      requirements:
+        sf_method: get
+
+    api_dql:
+      class: sfRequestRoute
+      url:   /api/dql/:_query.:sf_format
+      param: { module: api, action: index, _action: dql, sf_format: json }
+      requirements:
+        sf_method: get
+
+    api_entity_insert:
+      class: sfRequestRoute
+      url:   /api/:_entity.:sf_format
+      param: { module: api, action: index, _action: insert, sf_format: json }
+      requirements:
+        sf_method: post
+
+    api_entity_list:
+      class: sfRequestRoute
+      url:   /api/:_entity.:sf_format
+      param: { module: api, action: index, _action: list, sf_format: json }
+      requirements:
+        sf_method: get
+
+    api_entity_get:
+      class: sfRequestRoute
+      url:   /api/:_entity/:_id.:sf_format
+      param: { module: api, action: index, _action: get, sf_format: json }
+      requirements:
+        _id: \d+
+        sf_method: get
+
+    api_entity_update:
+      class: sfRequestRoute
+      url:   /api/:_entity/:_id.:sf_format
+      param: { module: api, action: index, _action: update, sf_format: json }
+      requirements:
+        _id: \d+
+        sf_method: put
+
+    api_entity_delete:
+      class: sfRequestRoute
+      url:   /api/:_entity/:_id.:sf_format
+      param: { module: api, action: index, _action: delete, sf_format: json }
+      requirements:
+        _id: \d+
+        sf_method: delete
+
+Now we just need a module named api which implements the Doctrine 2 REST interface:
+
+    class apiActions extends sfActions
+    {
+      public function executeIndex(sfWebRequest $request)
+      {
+          $config = new \Doctrine\ORM\Configuration();
+          $config->setMetadataCacheImpl(new \Doctrine\Common\Cache\ArrayCache);
+          $config->setProxyDir('/tmp');
+          $config->setProxyNamespace('Proxies');
+
+          $connectionOptions = array(
+            'driver' => 'pdo_sqlite',
+            'path' => '/path/to/project/data/database.sqlite'
+          );
+
+          $em = new \DoctrineExtensions\REST\EntityManager\Wrapper(
+            \Doctrine\ORM\EntityManager::create($connectionOptions, $config)
+          );
+
+          $requestData = $request->getParameterHolder()->getAll();
+          $restRequest = new \DoctrineExtensions\REST\Request($requestData);
+          $restResponse = new \DoctrineExtensions\REST\Response($restRequest);
+          $requestHandler = new \DoctrineExtensions\REST\RequestHandler($em, $restRequest, $restResponse);
+
+          $restRequest['_method'] = strtolower($request->getMethod());
+          $restRequest['_format'] = $request->getParameter('sf_format');
+
+          unset(
+            $restRequest['module'],
+            $restRequest['action'],
+            $restRequest['sf_format']
+          );
+
+          $requestHandler->getResponse()->send();
+          exit;
+      }
+    }
