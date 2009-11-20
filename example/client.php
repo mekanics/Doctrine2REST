@@ -7,4 +7,4 @@ $classLoader->setBasePath('../lib');
 $classLoader->register();
 
 $client = new \DoctrineExtensions\REST\Client('http://localhost/JWageGit/Doctrine2REST/example/server.php');
-print_r($client->list('Entities\User', array('username' => 'jwage')));
+print_r($client->list('Entities\User', array('_page' => '1')));
