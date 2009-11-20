@@ -82,7 +82,7 @@ You can configure required security credentials for the server too:
     $server->setPassword('changeme');
 
 If you have a more complex need for authentication you can override the callback
-used to check for valid credentials. In this example we'll use a Closer to demonstrate:
+used to check for valid credentials. In this example we'll use a Closure to demonstrate:
 
     $callback = function ($username, $password) {
         // check if username and password exists in the database
