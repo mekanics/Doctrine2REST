@@ -111,9 +111,9 @@ class ServerTest extends \PHPUnit_Framework_TestCase
         $requestHandler = $this->_getTestRequestHandler($requestData);
         $data = json_decode($requestHandler->getResponse()->getOutput());
         $this->assertEquals(array('id0' => 1, 'id1' => 2), (array) $data->request->id);
-        $this->assertEquals('test', $data->results[0]);
+        $this->assertEquals(array('username' => 'jwage'), (array) $data->results[0]);
         $this->assertEquals(1, $data->success);
-        $this->assertEquals(array('test'), $this->_em->removed);
+        $this->assertEquals(array(array('username' => 'jwage'), array('username' => 'jonwage')), $this->_em->removed);
     }
 
     public function testUpdate()
@@ -159,7 +159,7 @@ class ServerTest extends \PHPUnit_Framework_TestCase
 
         $requestHandler = $this->_getTestRequestHandler($requestData);
         $data = json_decode($requestHandler->getResponse()->getOutput());
-        $this->assertEquals('test', $data->results[0]);
+        $this->assertEquals(array('username' => 'jwage'), (array) $data->results[0]);
         $this->assertEquals(array('SELECT u FROM Doctrine2REST\Tests\TestEntity u'), $this->_em->dql);
     }
 
@@ -334,9 +334,14 @@ class QueryTest
     {
     }
 
+    public function getSingleResult()
+    {
+        return array('username' => 'jwage');
+    }
+
     public function execute()
     {
-        return array('test');
+        return array(array('username' => 'jwage'), array('username' => 'jonwage'));
     }
 }
 
