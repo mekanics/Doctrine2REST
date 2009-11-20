@@ -79,15 +79,49 @@ Lets setup our REST server:
 
 We can now do something like this from the command line to insert a new entity:
 
-    $ curl --data "username=jonwage" http://localhost/api.php?_action=insert&_entity=Entities\User
+    $ curl --data "username=jonwage" http://localhost/api.php?_action=insert&_entity=Entities\User&_format=xml
+    <?xml version="1.0" encoding="utf-8"?>
+    <doctrine>
+        <request>
+            <entity>Entities\User</entity>
+            <action>insert</action>
+            <format>xml</format>
+            <username>jonwage</username>
+            <method>post</method>
+        </request>
+        <success>1</success>
+        <results id="1">
+            <class_name>Entities\User</class_name>
+            <username>jonwage</username>
+        </results>
+    </doctrine>
 
 Or we can get an entity:
 
     $ curl http://localhost/api.php?_action=get&_entity=Entities\User&_id=1
+    <?xml version="1.0" encoding="utf-8"?>
+    <doctrine>
+        <request>
+            <entity>Entities\User</entity>
+            <action>get</action>
+            <id>19</id>
+            <format>xml</format>
+            <method>get</method>
+            <page>1</page>
+        </request>
+        <success>1</success>
+        <results>
+            <result id="19">
+                <class_name>Entities\User</class_name>
+                <username>jonwage</username>
+            </result>
+        </results>
+    </doctrine>
 
 The URLs aren't search engine friendly but that can be easily fixed by implementing
 the server in something like Symfony where you can using a routing system to have
-nice search engine friendly urls.
+nice search engine friendly urls. Late at the end of this README I'll demonstrate
+this.
 
 ## Client
 
@@ -106,6 +140,51 @@ return a list of the available actions. It returns information about each action
 such as required request method, required arguments, etc. 
 
     $result = $client->actions();
+    print_r($result);
+
+This would output the following:
+
+    stdClass Object
+    (
+        [request] => stdClass Object
+            (
+                [format] => json
+                [action] => actions
+                [method] => get
+            )
+
+        [success] => 1
+        [results] => stdClass Object
+            (
+                [actions] => stdClass Object
+                    (
+                        [action0] => stdClass Object
+                            (
+                                [title] => Delete Entity
+                                [description] => Delete entities by their identifiers.
+                                [name] => delete
+                                [method] => delete
+                                [required] => _entity, _id
+                                [url] => http://localhost/JWageGit/Doctrine2REST/example/server.php?_entity=:_entity&_id=:_id&_format=json&_action=delete
+                                [example] => curl -d "_entity=User&_id=1" http://localhost/JWageGit/Doctrine2REST/example/server.php?_action=delete&_format=json&_method=delete
+                            )
+
+                        [action1] => stdClass Object
+                            (
+                                [title] => Get Entity
+                                [description] => Get entities by their identifiers.
+                                [name] => get
+                                [method] => get
+                                [required] => _entity, _id
+                                [url] => http://localhost/JWageGit/Doctrine2REST/example/server.php?_entity=:_entity&_id=:_id&_format=json&_action=get
+                                [example] => curl  http://localhost/JWageGit/Doctrine2REST/example/server.php?_action=get&_format=json&_entity=User&_id=1
+                            )
+
+                        // ...
+
+                    )
+            )
+    )
 
 ### List Action
 
@@ -113,9 +192,66 @@ Now we can start executing actions. First lets list some entities:
 
     $result = $client->list('Entities\User', array('username' => 'jwage'));
 
+This would output the following:
+
+    stdClass Object
+    (
+        [request] => stdClass Object
+            (
+                [entity] => Entities\User
+                [format] => json
+                [action] => list
+                [username] => jwage
+                [method] => get
+                [page] => 1
+            )
+
+        [success] => 1
+        [results] => stdClass Object
+            (
+                [result0] => stdClass Object
+                    (
+                        [class_name] => Entities\User
+                        [id] => 10
+                        [username] => jwage
+                    )
+
+            )
+
+    )
+
 You can retrieve pages at a time:
 
-    $result = $client->list('Entities\User', array('_page' => 1));
+    $result = $client->list('Entities\User', array('_page' => 2));
+
+    stdClass Object
+    (
+        [request] => stdClass Object
+            (
+                [entity] => Entities\User
+                [format] => json
+                [action] => list
+                [username] => jwage
+                [method] => get
+                [page] => 2
+            )
+
+        [success] => 1
+        [results] => stdClass Object
+            (
+                [result0] => stdClass Object
+                    (
+                        [class_name] => Entities\User
+                        [id] => 10
+                        [username] => jwage
+                    )
+                
+                
+                // ...
+
+            )
+
+    )
 
 If you want to specify the number to show per page you can do the following:
 
@@ -130,18 +266,95 @@ Or you can get specific and pass the start and max values:
 You can insert new entities by using the insert() method:
 
     $result = $client->insert('Entities\User', array('username' => 'jwage'));
+    print_r($result);
+
+This would output the data for the newly created entity:
+
+    stdClass Object
+    (
+        [request] => stdClass Object
+            (
+                [entity] => Entities\User
+                [format] => json
+                [action] => insert
+                [username] => insertnew
+                [method] => post
+            )
+
+        [success] => 1
+        [results] => stdClass Object
+            (
+                [class_name] => Entities\User
+                [id] => 20
+                [username] => insertnew
+            )
+
+    )
 
 ### Update Action
 
 To update an entity just use the update() method:
 
-    $result = $client->update('Entities\User', 1, array('username' => 'jonwage'));
+    $result = $client->update('Entities\User', 20, array('username' => 'updated'));
+
+Of course, $result is going to be what you expect :)
+
+    stdClass Object
+    (
+        [request] => stdClass Object
+            (
+                [entity] => Entities\User
+                [id] => 20
+                [format] => json
+                [action] => update
+                [username] => updated
+                [method] => put
+            )
+
+        [success] => 1
+        [results] => stdClass Object
+            (
+                [class_name] => Entities\User
+                [id] => 20
+                [username] => updated
+            )
+
+    )
+
+The updated information!
 
 ### Get Action
 
 You can get an entity by using the get() method:
 
-    $result = $client->get('Entities\User', 1);
+    $result = $client->get('Entities\User', 20);
+
+    stdClass Object
+    (
+        [request] => stdClass Object
+            (
+                [entity] => Entities\User
+                [id] => 20
+                [format] => json
+                [action] => get
+                [method] => get
+                [page] => 1
+            )
+
+        [success] => 1
+        [results] => stdClass Object
+            (
+                [result0] => stdClass Object
+                    (
+                        [class_name] => Entities\User
+                        [id] => 20
+                        [username] => updated
+                    )
+
+            )
+
+    )
+
 
 You can retrieve multiple entities by id with the get() method as well:
 
@@ -165,7 +378,35 @@ One convenient feature of the API is the ability to execute arbitrary DQL querie
 
 You can even issue a DELETE or UPDATE query:
 
-    $result = $client->dql('DELETE FROM Entities\User u WHERE u.id = 1');
+    $result = $client->dql('SELECT u FROM Entities\User u WHERE u.id = 20');
+    print_r($result);
+
+This would output the results of the DQL query:
+
+    stdClass Object
+    (
+        [request] => stdClass Object
+            (
+                [query] => SELECT u FROM Entities\User u WHERE u.id = 20
+                [format] => json
+                [action] => dql
+                [method] => get
+                [page] => 1
+            )
+
+        [success] => 1
+        [results] => stdClass Object
+            (
+                [result0] => stdClass Object
+                    (
+                        [class_name] => Entities\User
+                        [id] => 20
+                        [username] => updated
+                    )
+
+            )
+
+    )
 
 ## Using in Symfony
 
