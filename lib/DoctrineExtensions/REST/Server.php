@@ -14,12 +14,28 @@ class Server
             $requestData['_method'] = strtolower($_SERVER['REQUEST_METHOD']);
         }
         $request = new Request($requestData);
-        $this->_requestHandler = new RequestHandler($em, $request, new Response($request));
+        $response = new Response($request);
+        $this->_requestHandler = new RequestHandler($em, $request, $response);
     }
 
     public function registerAction($action, $className)
     {
         $this->_requestHandler->registerAction($action, $className);
+    }
+
+    public function isSecure($bool = null)
+    {
+        return $this->_requestHandler->isSecure($bool);
+    }
+
+    public function setUsername($username)
+    {
+        $this->_requestHandler->setUsername($username);
+    }
+
+    public function setPassword($password)
+    {
+        $this->_requestHandler->setPassword($password);
     }
 
     public function run()

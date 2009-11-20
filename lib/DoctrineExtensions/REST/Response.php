@@ -4,12 +4,18 @@ namespace DoctrineExtensions\REST;
 
 class Response
 {
+    private $_requestHandler;
     private $_request;
     private $_responseData;
 
     public function __construct(Request $request)
     {
         $this->_request = $request;
+    }
+
+    public function setRequestHandler(RequestHandler $requestHandler)
+    {
+        $this->_requestHandler = $requestHandler;
     }
 
     public function setError($error)
@@ -31,6 +37,15 @@ class Response
 
     private function _sendHeaders()
     {
+        if ( ! isset($_SERVER['PHP_AUTH_USER'])) {
+            header('WWW-Authenticate: Basic realm="Doctrine REST API"');
+            header('HTTP/1.0 401 Unauthorized');
+        } else {
+            if ( ! $this->_requestHandler->hasValidCredentials()) {
+                $this->setError('Invalid credentials specified.');
+            }
+        }
+
         switch ($this->_request['_format']) {
             case 'php':
                 header('Content-type: text/html;');

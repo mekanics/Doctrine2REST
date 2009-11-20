@@ -7,6 +7,12 @@ use DoctrineExtensions\REST\EntityManager\WrapperInterface;
 class RequestHandler
 {
     private $_em;
+    private $_request;
+    private $_response;
+    private $_isSecure = false;
+    private $_username;
+    private $_password;
+    private $_credentialsCallback;
 
     private $_actions = array(
         'delete' => 'DoctrineExtensions\\REST\\Action\\Delete',
@@ -18,20 +24,70 @@ class RequestHandler
         'actions' => 'DoctrineExtensions\\REST\\Action\Actions'
     );
 
-    public function __construct(WrapperInterface $em, Request $request, Response $response = null)
+    public function __construct(WrapperInterface $em, Request $request, Response $response)
     {
-        if ( ! $response) {
-            $response = new Response($request);
-        }
-
         $this->_em = $em;
         $this->_request = $request;
         $this->_response = $response;
+        $this->_response->setRequestHandler($this);
+        $this->_credentialsCallback = array($this, 'checkCredentials');
+    }
+
+    public function setCredentialsCallback($callback)
+    {
+        $this->_credentialsCallback = $callback;
     }
 
     public function registerAction($action, $className)
     {
         $this->_actions[$action] = $className;
+    }
+
+    public function isSecure($bool = null)
+    {
+        if ($bool !== null) {
+            $this->_isSecure = $bool;
+        }
+        return $this->_isSecure;
+    }
+
+    public function checkCredentials($username, $password)
+    {
+        if ( ! $this->_isSecure) {
+            return true;
+        }
+
+        if ($this->_username == $username && $this->_password == $password) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public function hasValidCredentials()
+    {
+        $args = array($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']);
+        return call_user_func_array($this->_credentialsCallback, $args);
+    }
+
+    public function getUsername()
+    {
+        return $this->_username;
+    }
+
+    public function setUsername($username)
+    {
+        $this->_username = $username;
+    }
+
+    public function getPassword()
+    {
+        return $this->_password;
+    }
+
+    public function setPassword($password)
+    {
+        $this->_password = $password;
     }
 
     public function getActions()

@@ -6,12 +6,15 @@ class Client
 {
     private $_url;
     private $_actions = array();
+    private $_username;
+    private $_password;
 
-    public function __construct($url)
+    public function __construct($url, $username = null, $password = null)
     {
+        $this->_username = $username;
+        $this->_password = $password;
         $this->_url = $url;
-        $json = file_get_contents($this->_url);
-        $data = json_decode($json);
+        $data = $this->_getUrl($this->_url);
         foreach ($data->results->actions as $act) {
             $action = array();
             $action['method'] = $act->method;
@@ -22,6 +25,33 @@ class Client
             }
             $this->_actions[$act->name] = $action;
         }
+    }
+
+    private function _getUrl($url, $method = 'get')
+    {
+        if ($this->_username && $this->_password) {
+            $context = stream_context_create(array(
+                'http' => array(
+                    'method'  => $method,
+                    'header'  => sprintf("Authorization: Basic %s\r\n", base64_encode($this->_username . ':' . $this->_password)).
+                        "Content-type: application/x-www-form-urlencoded\r\n",
+                    'timeout' => 5,
+                )
+            ));
+        } else {
+            $context = stream_context_create(array(
+                'http' => array(
+                    'method'  => $method,
+                    'timeout' => 5,
+                )
+            ));
+        }
+        $data = file_get_contents($url, false, $context);
+        $data = json_decode($data);
+        if (isset($data->results->error)) {
+            throw new \Exception($data->results->error);
+        }
+        return $data;
     }
 
     public function executeAction($action, array $parameters = array())
@@ -63,11 +93,9 @@ class Client
             $parameters[$key] = $value;
         }
         $url .= $j . http_build_query($parameters);
+        $url = str_replace(' ', '%20', $url);
 
-        $json = file_get_contents(str_replace(' ', '%20', $url));
-        $data = json_decode($json);
-
-        return $data;
+        return $this->_getUrl($url, $action['method']);
     }
 
     public function __call($method, $arguments)

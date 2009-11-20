@@ -75,6 +75,24 @@ to our REST server:
 Lets setup our REST server:
 
     $server = new \DoctrineExtensions\REST\Server($em, $_REQUEST);
+
+You can configure required security credentials for the server too:
+
+    $server->isSecure(true);
+    $server->setUsername('jwage');
+    $server->setPassword('changeme');
+
+If you have a more complex need for authentication you can override the callback
+used to check for valid credentials. In this example we'll use a Closer to demonstrate:
+
+    $callback = function ($username, $password) {
+        // check if username and password exists in the database
+        return true;
+    };
+    $server->setCredentialsCallback($callback);
+
+Now you can start the server:
+
     $server->run();
 
 We can now do something like this from the command line to insert a new entity:
