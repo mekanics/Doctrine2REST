@@ -269,3 +269,20 @@ Now we just need a module named api which implements the Doctrine 2 REST interfa
           exit;
       }
     }
+
+The result of this is that the URLs are much more friendly. For example to get 
+an entity with curl would look like the following with a simple get request:
+
+    curl http://localhost/api/Entities\User/1.xml
+
+Or if you want to update that entity we need to issue a put request:
+
+    curl --data "sf_method=put&username=newusername" http://localhost/api/Entities\User/1.xml
+
+Or to delete that user we need to issue a delete request:
+
+    curl --data "sf_method=delete" http://localhost/api/Entities\User/1.xml
+
+We can insert a new user just as easily by issuing a post request:
+
+    curl --data "username=jwage" http://localhost/api/Entities\User.xml
