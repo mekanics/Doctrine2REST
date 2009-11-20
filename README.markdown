@@ -79,11 +79,11 @@ Lets setup our REST server:
 
 We can now do something like this from the command line to insert a new entity:
 
-    curl --data "username=jonwage" http://localhost/api.php?_action=insert&_entity=Entities\User
+    $ curl --data "username=jonwage" http://localhost/api.php?_action=insert&_entity=Entities\User
 
 Or we can get an entity:
 
-    curl http://localhost/api.php?_action=get&_entity=Entities\User&_id=1
+    $ curl http://localhost/api.php?_action=get&_entity=Entities\User&_id=1
 
 The URLs aren't search engine friendly but that can be easily fixed by implementing
 the server in something like Symfony where you can using a routing system to have
@@ -273,16 +273,16 @@ Now we just need a module named api which implements the Doctrine 2 REST interfa
 The result of this is that the URLs are much more friendly. For example to get 
 an entity with curl would look like the following with a simple get request:
 
-    curl http://localhost/api/Entities\User/1.xml
+    $ curl http://localhost/api/Entities\User/1.xml
 
 Or if you want to update that entity we need to issue a put request:
 
-    curl --data "sf_method=put&username=newusername" http://localhost/api/Entities\User/1.xml
+    $ curl --data "sf_method=put&username=newusername" http://localhost/api/Entities\User/1.xml
 
 Or to delete that user we need to issue a delete request:
 
-    curl --data "sf_method=delete" http://localhost/api/Entities\User/1.xml
+    $ curl --data "sf_method=delete" http://localhost/api/Entities\User/1.xml
 
 We can insert a new user just as easily by issuing a post request:
 
-    curl --data "username=jwage" http://localhost/api/Entities\User.xml
+    $ curl --data "username=jwage" http://localhost/api/Entities\User.xml
