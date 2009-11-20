@@ -8,5 +8,5 @@ $classLoader->register();
 
 $url = 'http://localhost/JWageGit/Doctrine2REST/example/server.php';
 $client = new \DoctrineExtensions\REST\Client($url, 'jwage', 'password');
-$result = $client->dql('SELECT u FROM Entities\User u WHERE u.id = 20');
+$result = $client->get('Entities\User', array('20', '18'));
 print_r($result);

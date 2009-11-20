@@ -40,7 +40,11 @@ class Get extends AbstractAction implements ActionInterface
         $query = $this->_getFindByIdQuery($this->_request['_entity'], $this->_request['_id']);
         $this->_setQueryFirstAndMax($query);
 
-        $result = $query->execute();
+        if (count((array) $this->_request['_id']) > 1) {
+            $result = $query->execute();
+        } else {
+            $result = $query->getSingleResult();
+        }
 
         if ( ! $result) {
             throw new \InvalidArgumentException(sprintf('Could not find the "%s" with an ids of "%s"', $this->_request['_entity'], implode(', ', (array) $this->_request['_id'])));

@@ -127,11 +127,9 @@ Or we can get an entity:
             <page>1</page>
         </request>
         <success>1</success>
-        <results>
-            <result id="19">
-                <class_name>Entities\User</class_name>
-                <username>jonwage</username>
-            </result>
+        <results id="19">
+            <class_name>Entities\User</class_name>
+            <username>jonwage</username>
         </results>
     </doctrine>
 
