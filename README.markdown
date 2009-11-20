@@ -97,7 +97,7 @@ or use as an example to build a client in another language.
 
 First instantiate a new client instance:
 
-    $client = new \DoctrineExtensions\REST\Client('http://localhost/JWageGit/Doctrine2REST/example/server.php');
+    $client = new \DoctrineExtensions\REST\Client('http://localhost/api.php');
 
 ### List Actions
 
